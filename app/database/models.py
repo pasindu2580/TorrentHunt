@@ -108,6 +108,18 @@ class Referrer(Base):
     date = Column(TIMESTAMP, server_default=func.current_timestamp())
 
 
+class BotConfig(Base):
+    __tablename__ = "bot_config"
+
+    id = Column(Integer, primary_key=True, default=1)
+    proxy_1337x = Column(String, nullable=True)
+    updated_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+    )
+
+
 async def init_models():
     logger.info("Creating metadata for database")
     async with engine.begin() as conn:

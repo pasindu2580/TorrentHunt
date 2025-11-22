@@ -3,6 +3,7 @@
 import asyncio
 from os import environ
 from sys import argv
+
 from dotenv import load_dotenv
 
 # It's crucial to load the environment variables before other imports
@@ -19,6 +20,7 @@ from langs.lang import Lang
 from loguru import logger
 from models.explicit_detector.explicit_detector import ExplicitDetector
 from plugins.blueprint.schema import Schema
+from plugins.functions.database import get_bot_config
 from plugins.functions.filters import Filter
 from plugins.functions.init import Init
 from plugins.functions.keyboards import KeyBoard
@@ -55,7 +57,6 @@ Client.misc = Misc(bot)
 Client.keyboard = KeyBoard(bot)
 Client.language = Lang("langs/string.json", "langs/lang.json")
 Client.requests = Requests()
-Client.py1337x = AsyncPy1337x()
 Client.struct = Schema(bot)
 filters.custom = Filter(bot)
 Client.explicit_detector = ExplicitDetector()
@@ -64,6 +65,19 @@ Client.explicit_detector = ExplicitDetector()
 async def main():
     async with bot:
         await init_models()
+
+        # Load bot configuration and initialize py1337x
+
+        logger.info("Loading bot configuration")
+        bot_config = await get_bot_config()
+
+        if bot_config.proxy_1337x:
+            logger.info(f"Initializing py1337x with proxy: {bot_config.proxy_1337x}")
+            Client.py1337x = AsyncPy1337x(base_url=f"https://www.{bot_config.proxy_1337x}")
+        else:
+            logger.info("Initializing py1337x with default proxy")
+            Client.py1337x = AsyncPy1337x()
+
         if "--no-init" not in argv:
             logger.info("Initializing requirements for bot")
             bot_init = Init(bot)
