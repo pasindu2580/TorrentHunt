@@ -16,7 +16,7 @@ async def get_bot_config():
 
     if not config:
         config = BotConfig(id=1)
-        await Client.DB.add(config)
+        await Client.DB.merge(config)
 
     return config
 
