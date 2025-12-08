@@ -69,14 +69,18 @@ async def main():
         # Load bot configuration and initialize py1337x
 
         logger.info("Loading bot configuration")
-        bot_config = await get_bot_config()
+        async with Client.DB.session() as session:
+            bot_config = await get_bot_config(session)
+            session.add(bot_config)
 
-        if bot_config.proxy_1337x:
-            logger.info(f"Initializing py1337x with proxy: {bot_config.proxy_1337x}")
-            Client.py1337x = AsyncPy1337x(base_url=f"https://www.{bot_config.proxy_1337x}")
-        else:
-            logger.info("Initializing py1337x with default proxy")
-            Client.py1337x = AsyncPy1337x()
+            if bot_config.proxy_1337x:
+                logger.info(f"Initializing py1337x with proxy: {bot_config.proxy_1337x}")
+                Client.py1337x = AsyncPy1337x(
+                    base_url=f"https://www.{bot_config.proxy_1337x}"
+                )
+            else:
+                logger.info("Initializing py1337x with default proxy")
+                Client.py1337x = AsyncPy1337x()
 
         if "--no-init" not in argv:
             logger.info("Initializing requirements for bot")

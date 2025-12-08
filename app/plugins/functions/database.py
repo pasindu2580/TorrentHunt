@@ -10,13 +10,16 @@ async def get_restricted_mode(user_id: int):
     return restricted_mode.scalar()
 
 
-async def get_bot_config():
+async def get_bot_config(session):
     """Get bot configuration. Creates default config if not exists."""
-    config = await Client.DB.get(BotConfig, 1)
+    query = select(BotConfig).where(BotConfig.id == 1)
+    result = await session.execute(query)
+    config = result.scalar_one_or_none()
 
     if not config:
         config = BotConfig(id=1)
-        await Client.DB.merge(config)
+        session.add(config)
+        await session.commit()
 
     return config
 
